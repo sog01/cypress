@@ -233,7 +233,7 @@ verify = (cy, $el, options, callbacks) ->
 
         if onScroll
           onScroll($el, "element")
-
+        debugger
         ## ensure its visible
         cy.ensureVisibility($el, _log)
 

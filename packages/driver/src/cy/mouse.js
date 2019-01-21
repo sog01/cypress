@@ -178,7 +178,7 @@ const create = (state) => {
 
     },
 
-    mouseDown ($elToClick, fromViewport) {
+    mouseDown ($elToClick, fromViewport, force) {
       const el = $elToClick.get(0)
       const { x, y } = fromViewport
 
@@ -213,7 +213,7 @@ const create = (state) => {
         detail: 1,
         // only for events involving moving cursor
         relatedTarget: null,
-        currentTarget: el,
+        // currentTarget: el,
         view: win,
       }, _activeModifiers)
 
@@ -272,6 +272,9 @@ const create = (state) => {
         detail: 1,
       }, _activeModifiers)
 
+
+      // el = ensureEl
+
       let pointerupProps = sendPointerup(el, defaultOptions)
 
       if (modifiers) {
@@ -289,6 +292,7 @@ const create = (state) => {
 
         if (elAtCoords !== el) {
           el = elAtCoords
+          state('lastHoveredEl', el)
         }
       }
 
@@ -367,6 +371,8 @@ const sendPointerEvent = (el, evtOptions, evtName, bubbles = false, cancelable =
   return sendEvent(evtName, el, evtOptions, bubbles, cancelable, constructor)
 }
 const sendMouseEvent = (el, evtOptions, evtName, bubbles = false, cancelable = false) => {
+  // IE doesn't have event constructors, so you should use document.createEvent('mouseevent')
+  // https://dom.spec.whatwg.org/#dom-document-createevent
   const constructor = el.ownerDocument.defaultView.MouseEvent
 
   return sendEvent(evtName, el, evtOptions, bubbles, cancelable, constructor)
