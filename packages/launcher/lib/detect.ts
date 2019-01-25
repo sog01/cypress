@@ -9,7 +9,7 @@ import { merge, pick, tap, uniqBy, props, flatten } from 'ramda'
 import { extend, compact } from 'lodash'
 import * as os from 'os'
 
-const setMajorVersion = (browser: Browser) => {
+const setMajorVersion = (browser: FoundBrowser) => {
   if (browser.version) {
     browser.majorVersion = browser.version.split('.')[0]
     log(
@@ -49,7 +49,9 @@ function lookup(
  * one for each binary. If Windows is detected, only one `checkOneBrowser` will be called, because
  * we don't use the `binary` field on Windows.
  */
-function checkBrowser(browser: Browser) {
+function checkBrowser(
+  browser: Browser
+): Promise<boolean | FoundBrowser | (boolean | FoundBrowser)[]> {
   if (Array.isArray(browser.binary) && os.platform() !== 'win32') {
     return Bluebird.mapSeries(browser.binary, (binary: string) => {
       return checkOneBrowser(extend({}, browser, { binary }))
@@ -90,7 +92,7 @@ function checkOneBrowser(browser: Browser): Promise<boolean | FoundBrowser> {
 }
 
 /** returns list of detected browsers */
-function detectBrowsers(goalBrowsers?: Browser[]): Bluebird<Browser[]> {
+function detectBrowsers(goalBrowsers?: Browser[]): Bluebird<FoundBrowser[]> {
   // we can detect same browser under different aliases
   // tell them apart by the name and the version property
   // @ts-ignore
@@ -101,7 +103,7 @@ function detectBrowsers(goalBrowsers?: Browser[]): Bluebird<Browser[]> {
   return Bluebird.mapSeries(goalBrowsers, checkBrowser)
     .then(flatten)
     .then(compact)
-    .then(removeDuplicates) as Bluebird<Browser[]>
+    .then(removeDuplicates) as Bluebird<FoundBrowser[]>
 }
 
 export default detectBrowsers
